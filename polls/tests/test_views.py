@@ -41,6 +41,36 @@ class PollsViewTest(TestCase):
         self.assertEqual(data[1]['fields']['description'], poll_2.description)
 
 
+class PollViewTest(TestCase):
+    def test_reverse(self):
+        self.assertEqual(reverse('poll', args=['wtgfl']), '/poll/wtgfl/')
+
+    def test_default_content(self):
+        poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
+        response = self.client.get(reverse('poll', args=[poll.name]))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['fields']['name'], poll.name)
+        self.assertEqual(data[0]['fields']['title'], poll.title)
+        self.assertEqual(data[0]['fields']['description'], poll.description)
+
+    def test_post_new_poll(self):
+        self.assertEqual(models.Poll.objects.count(), 0)
+        data = {
+            'title': 'New poll',
+            'description': 'This will be awesome'
+        }
+        response = self.client.put(reverse('poll', args=['new_poll']), data=json.dumps(data))
+        self.assertEqual(response.status_code, 200)
+        print(response.content)
+        self.assertEqual(models.Poll.objects.count(), 1)
+        poll = models.Poll.objects.first()
+        self.assertEqual(poll.name, 'new_poll')
+        self.assertEqual(poll.title, 'New poll')
+        self.assertEqual(poll.description, 'This will be awesome')
+
+
 class ChoicesViewTest(TestCase):
     def test_reverse(self):
         self.assertEqual(reverse('choices', args=['wtgfl']), '/poll/wtgfl/choices')
