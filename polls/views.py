@@ -3,7 +3,7 @@ import json
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
-
+from django.views.decorators.csrf import csrf_exempt
 from . import models
 
 
@@ -25,6 +25,7 @@ def choices(request, poll_name):
     return HttpResponse(choices_json, content_type='application/json')
 
 
+@csrf_exempt
 def poll(request, poll_name):
     if request.method == 'GET':
         poll_objects = models.Poll.objects.filter(name=poll_name)
@@ -38,3 +39,4 @@ def poll(request, poll_name):
         poll_object.description = poll_details['description']
         poll_object.save()
         return HttpResponse(request.body, content_type='application/json')
+    return HttpResponse('Unsupported method: {}'.format(request.method))
