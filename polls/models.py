@@ -19,3 +19,12 @@ class Choice(models.Model):
 
     def __str__(self):
         return '{}:{}'.format(self.poll.name, self.name)
+
+
+class Ballot(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
+    voter_name = models.SlugField(max_length=200)
+    choices = models.TextField()  # Array of choices in order of preference stored as JSON
+
+    def __str__(self):
+        return '{}:{}'.format(self.poll.name, self.voter_name)
