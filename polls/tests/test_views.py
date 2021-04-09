@@ -103,6 +103,43 @@ class ChoicesViewTest(TestCase):
         self.assertEqual(data[1]['fields']['color'], choice_2.color)
 
 
+class ChoiceViewTest(TestCase):
+    def test_reverse(self):
+        self.assertEqual(reverse('choice', args=['wtgfl', 'hamburger_hut']), '/poll/wtgfl/choice/hamburger_hut/')
+
+    def test_default_content(self):
+        poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
+        choice = models.Choice.objects.create(poll=poll, name='hamburger_hut', title='Hamburger Hut',
+                                              description='Fancy burgers', color='#fff')
+
+        response = self.client.get(reverse('choice', args=[poll.name, choice.name]))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['fields']['name'], choice.name)
+        self.assertEqual(data[0]['fields']['title'], choice.title)
+        self.assertEqual(data[0]['fields']['description'], choice.description)
+        self.assertEqual(data[0]['fields']['color'], choice.color)
+
+    def test_post_new_poll(self):
+        self.assertEqual(models.Choice.objects.count(), 0)
+        poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
+        data = {
+            'title': 'Hamburger Hut',
+            'description': 'Fancy burgers',
+            'color': '#fff'
+        }
+        response = self.client.put(reverse('choice', args=[poll.name, 'hamburger_hut']), data=json.dumps(data))
+        self.assertEqual(response.status_code, 200)
+        print(response.content)
+        self.assertEqual(models.Choice.objects.count(), 1)
+        choice = models.Choice.objects.first()
+        self.assertEqual(choice.name, 'hamburger_hut')
+        self.assertEqual(choice.title, 'Hamburger Hut')
+        self.assertEqual(choice.description, 'Fancy burgers')
+        self.assertEqual(choice.color, '#fff')
+
+
 class BallotsViewTest(TestCase):
     def test_reverse(self):
         self.assertEqual(reverse('ballots', args=['wtgfl']), '/poll/wtgfl/ballots')
