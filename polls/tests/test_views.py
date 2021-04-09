@@ -16,7 +16,7 @@ class IndexViewTest(TestCase):
 
 class PollsViewTest(TestCase):
     def test_reverse(self):
-        self.assertEqual(reverse('polls'), '/polls')
+        self.assertEqual(reverse('polls'), '/polls/')
 
     def test_empty_list(self):
         response = self.client.get(reverse('polls'))
@@ -89,7 +89,7 @@ class PollViewTest(TestCase):
 
 class ChoicesViewTest(TestCase):
     def test_reverse(self):
-        self.assertEqual(reverse('choices', args=['wtgfl']), '/poll/wtgfl/choices')
+        self.assertEqual(reverse('choices', args=['wtgfl']), '/poll/wtgfl/choices/')
 
     def test_empty_list(self):
         poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
@@ -158,7 +158,7 @@ class ChoiceViewTest(TestCase):
 
 class BallotsViewTest(TestCase):
     def test_reverse(self):
-        self.assertEqual(reverse('ballots', args=['wtgfl']), '/poll/wtgfl/ballots')
+        self.assertEqual(reverse('ballots', args=['wtgfl']), '/poll/wtgfl/ballots/')
 
     def test_empty_list(self):
         poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
