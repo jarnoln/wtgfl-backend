@@ -25,6 +25,13 @@ def choices(request, poll_name):
     return HttpResponse(choices_json, content_type='application/json')
 
 
+def ballots(request, poll_name):
+    poll_object = get_object_or_404(models.Poll, name=poll_name)
+    choice_objects = models.Ballot.objects.filter(poll=poll_object)
+    choices_json = serializers.serialize('json', choice_objects)
+    return HttpResponse(choices_json, content_type='application/json')
+
+
 @csrf_exempt
 def poll(request, poll_name):
     if request.method == 'GET':
@@ -33,7 +40,7 @@ def poll(request, poll_name):
         return HttpResponse(poll_json, content_type='application/json')
     if request.method == 'PUT':
         poll_details = json.loads(request.body)
-        print(poll_details)
+        # print(poll_details)
         poll_object, created = models.Poll.objects.get_or_create(name=poll_name)
         poll_object.title = poll_details['title']
         poll_object.description = poll_details['description']

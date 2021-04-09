@@ -101,3 +101,36 @@ class ChoicesViewTest(TestCase):
         self.assertEqual(data[1]['fields']['title'], choice_2.title)
         self.assertEqual(data[1]['fields']['description'], choice_2.description)
         self.assertEqual(data[1]['fields']['color'], choice_2.color)
+
+
+class BallotsViewTest(TestCase):
+    def test_reverse(self):
+        self.assertEqual(reverse('ballots', args=['wtgfl']), '/poll/wtgfl/ballots')
+
+    def test_empty_list(self):
+        poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
+        response = self.client.get(reverse('ballots', args=[poll.name]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
+        data = json.loads(response.content)
+        self.assertEqual(data, [])
+
+    def test_default_content(self):
+        poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
+        choice_1 = models.Choice.objects.create(poll=poll, name='hamburger_hut', title='Hamburger Hut',
+                                                description='Fancy burgers', color='#fff')
+        choice_2 = models.Choice.objects.create(poll=poll, name='pizza_palace', title='Pizza Palace',
+                                                description='Basic pizza', color='#aaa')
+        ballot_1_choices = [choice_1.name, choice_2.name]
+        ballot_2_choices = [choice_2.name, choice_1.name]
+        ballot_1 = models.Ballot.objects.create(poll=poll, voter_name='voter_1', choices=json.dumps(ballot_1_choices))
+        ballot_2 = models.Ballot.objects.create(poll=poll, voter_name='voter_2', choices=json.dumps(ballot_2_choices))
+
+        response = self.client.get(reverse('ballots', args=[poll.name]))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['fields']['voter_name'], ballot_1.voter_name)
+        self.assertEqual(data[0]['fields']['choices'], '["hamburger_hut", "pizza_palace"]')
+        self.assertEqual(data[1]['fields']['voter_name'], ballot_2.voter_name)
+        self.assertEqual(data[1]['fields']['choices'], '["pizza_palace", "hamburger_hut"]')
