@@ -45,7 +45,16 @@ def poll(request, poll_name):
         poll_object.title = poll_details['title']
         poll_object.description = poll_details['description']
         poll_object.save()
+        if created:
+            status_code = 201
+        else:
+            status_code = 200
+        return HttpResponse(request.body, content_type='application/json', status=status_code)
+    if request.method == 'DELETE':
+        poll_object = get_object_or_404(models.Poll, name=poll_name)
+        poll_object.delete()
         return HttpResponse(request.body, content_type='application/json')
+
     return HttpResponse('Unsupported method: {}'.format(request.method))
 
 
@@ -65,7 +74,11 @@ def choice(request, poll_name, choice_name):
         choice_object.description = choice_details['description']
         choice_object.color = choice_details['color']
         choice_object.save()
-        return HttpResponse(request.body, content_type='application/json')
+        if created:
+            status_code = 201
+        else:
+            status_code = 200
+        return HttpResponse(request.body, content_type='application/json', status=status_code)
     return HttpResponse('Unsupported method: {}'.format(request.method))
 
 
@@ -85,5 +98,9 @@ def ballot(request, poll_name, voter_name):
         # ballot_object.choices = json.dumps(choices)
         ballot_object.choices = choices
         ballot_object.save()
-        return HttpResponse(request.body, content_type='application/json')
+        if created:
+            status_code = 201
+        else:
+            status_code = 200
+        return HttpResponse(request.body, content_type='application/json', status=status_code)
     return HttpResponse('Unsupported method: {}'.format(request.method))

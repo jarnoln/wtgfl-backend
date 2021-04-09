@@ -62,13 +62,29 @@ class PollViewTest(TestCase):
             'description': 'This will be awesome'
         }
         response = self.client.put(reverse('poll', args=['new_poll']), data=json.dumps(data))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         print(response.content)
         self.assertEqual(models.Poll.objects.count(), 1)
         poll = models.Poll.objects.first()
         self.assertEqual(poll.name, 'new_poll')
         self.assertEqual(poll.title, 'New poll')
         self.assertEqual(poll.description, 'This will be awesome')
+
+    def test_delete_poll(self):
+        poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
+        choice_1 = models.Choice.objects.create(poll=poll, name='hamburger_hut', title='Hamburger Hut',
+                                                description='Fancy burgers', color='#fff')
+        choice_2 = models.Choice.objects.create(poll=poll, name='pizza_palace', title='Pizza Palace',
+                                                description='Basic pizza', color='#aaa')
+        ballot_1_choices = [choice_1.name, choice_2.name]
+        ballot_2_choices = [choice_2.name, choice_1.name]
+        ballot_1 = models.Ballot.objects.create(poll=poll, voter_name='voter_1', choices=json.dumps(ballot_1_choices))
+        ballot_2 = models.Ballot.objects.create(poll=poll, voter_name='voter_2', choices=json.dumps(ballot_2_choices))
+        response = self.client.delete(reverse('poll', args=[poll.name]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(models.Ballot.objects.count(), 0)
+        self.assertEqual(models.Choice.objects.count(), 0)
+        self.assertEqual(models.Poll.objects.count(), 0)
 
 
 class ChoicesViewTest(TestCase):
@@ -121,7 +137,7 @@ class ChoiceViewTest(TestCase):
         self.assertEqual(data[0]['fields']['description'], choice.description)
         self.assertEqual(data[0]['fields']['color'], choice.color)
 
-    def test_post_new_poll(self):
+    def test_post_new_choice(self):
         self.assertEqual(models.Choice.objects.count(), 0)
         poll = models.Poll.objects.create(name='wtgfl', title='Where To Go For Lunch?')
         data = {
@@ -130,7 +146,7 @@ class ChoiceViewTest(TestCase):
             'color': '#fff'
         }
         response = self.client.put(reverse('choice', args=[poll.name, 'hamburger_hut']), data=json.dumps(data))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         print(response.content)
         self.assertEqual(models.Choice.objects.count(), 1)
         choice = models.Choice.objects.first()
@@ -203,7 +219,7 @@ class BallotViewTest(TestCase):
             'choices': json.dumps([choice_2.name, choice_1.name])
         }
         response = self.client.put(reverse('ballot', args=[poll.name, 'voter_1']), data=json.dumps(data))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         print(response.content)
         self.assertEqual(models.Ballot.objects.count(), 1)
         ballot = models.Ballot.objects.first()
