@@ -9,4 +9,5 @@ urlpatterns = [
    path('poll/<slug:poll_name>/choices', views.choices, name='choices'),
    path('poll/<slug:poll_name>/choice/<slug:choice_name>/', views.choice, name='choice'),
    path('poll/<slug:poll_name>/ballots', views.ballots, name='ballots'),
+   path('poll/<slug:poll_name>/ballot/<slug:voter_name>/', views.ballot, name='ballot'),
 ]

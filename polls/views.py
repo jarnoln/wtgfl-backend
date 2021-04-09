@@ -67,3 +67,23 @@ def choice(request, poll_name, choice_name):
         choice_object.save()
         return HttpResponse(request.body, content_type='application/json')
     return HttpResponse('Unsupported method: {}'.format(request.method))
+
+
+@csrf_exempt
+def ballot(request, poll_name, voter_name):
+    if request.method == 'GET':
+        poll_object = get_object_or_404(models.Poll, name=poll_name)
+        ballot_objects = models.Ballot.objects.filter(poll=poll_object, voter_name=voter_name)
+        ballot_json = serializers.serialize('json', ballot_objects)
+        return HttpResponse(ballot_json, content_type='application/json')
+    if request.method == 'PUT':
+        poll_object = get_object_or_404(models.Poll, name=poll_name)
+        ballot_details = json.loads(request.body)
+        print(ballot_details)
+        ballot_object, created = models.Ballot.objects.get_or_create(poll=poll_object, voter_name=voter_name)
+        choices = ballot_details['choices']
+        # ballot_object.choices = json.dumps(choices)
+        ballot_object.choices = choices
+        ballot_object.save()
+        return HttpResponse(request.body, content_type='application/json')
+    return HttpResponse('Unsupported method: {}'.format(request.method))
