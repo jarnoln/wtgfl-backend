@@ -27,9 +27,9 @@ def choices(request, poll_name):
 
 def ballots(request, poll_name):
     poll_object = get_object_or_404(models.Poll, name=poll_name)
-    choice_objects = models.Ballot.objects.filter(poll=poll_object)
-    choices_json = serializers.serialize('json', choice_objects)
-    return HttpResponse(choices_json, content_type='application/json')
+    ballot_objects = models.Ballot.objects.filter(poll=poll_object)
+    ballots_json = serializers.serialize('json', ballot_objects)
+    return HttpResponse(ballots_json, content_type='application/json')
 
 
 @csrf_exempt
@@ -94,9 +94,7 @@ def ballot(request, poll_name, voter_name):
         ballot_details = json.loads(request.body)
         print(ballot_details)
         ballot_object, created = models.Ballot.objects.get_or_create(poll=poll_object, voter_name=voter_name)
-        choices = ballot_details['choices']
-        # ballot_object.choices = json.dumps(choices)
-        ballot_object.choices = choices
+        ballot_object.choices = ballot_details['choices']
         ballot_object.save()
         if created:
             status_code = 201
