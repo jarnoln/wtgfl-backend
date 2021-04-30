@@ -136,9 +136,11 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    'https://wtgfl.com',
-    'https://wtgfl.onrender.com',
-    'https://wtgfl-backend.onrender.com',
-    'http://127.0.0.1:8080'
-]
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:8080']
+else:
+    CORS_ALLOWED_ORIGINS = [
+        'https://wtgfl.com',
+        'https://wtgfl.onrender.com',
+        'https://schulzevote.com',
+    ]
